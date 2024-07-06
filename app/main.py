@@ -6,6 +6,25 @@ from .grammar import Token, TokenType
 
 class Scanner:
 
+    keywords = {
+        "and": TokenType.AND,
+        "class": TokenType.CLASS,
+        "else": TokenType.ELSE,
+        "false": TokenType.FALSE,
+        "for": TokenType.FOR,
+        "fun": TokenType.FUN,
+        "if": TokenType.IF,
+        "nil": TokenType.NIL,
+        "or": TokenType.OR,
+        "print": TokenType.PRINT,
+        "return": TokenType.RETURN,
+        "super": TokenType.SUPER,
+        "this": TokenType.THIS,
+        "true": TokenType.TRUE,
+        "var": TokenType.VAR,
+        "while": TokenType.WHILE,
+    }
+
     def __init__(
         self,
         source: str
@@ -139,7 +158,8 @@ class Scanner:
         while self.is_alpha_or_number(self.peek()):
             self.advance()
 
-        self.add_token(TokenType.IDENTIFIER)
+        type = self.keywords.get(self.text, TokenType.IDENTIFIER)
+        self.add_token(type)
 
     def is_number(self, character: str):
         return character.isnumeric()
