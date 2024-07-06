@@ -63,7 +63,7 @@ class Scanner:
         self.report(line, "", message)
 
     def report(self, line: int, where: str, message: str):
-        print(f"[line {line}] Error{where}: {message}")
+        print(f"[line {line}] Error{where}: {message}", file=sys.stderr)
         self.had_error = True
 
 
