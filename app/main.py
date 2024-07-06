@@ -49,12 +49,23 @@ class Scanner:
             case '+': self.add_token(TokenType.PLUS)
             case ';': self.add_token(TokenType.SEMICOLON)
             case '*': self.add_token(TokenType.STAR)
+            case '=': self.add_token(TokenType.EQUAL_EQUAL if self.match('=') else TokenType.EQUAL)
             case _: self.error(self.line, f"Unexpected character: {character}")
 
     def advance(self):
         index = self.current
         self.current += 1
         return self.source[index]
+
+    def match(self, expected: str):
+        if self.is_at_end:
+            return False
+
+        if self.source[self.current] != expected:
+            return False
+
+        self.current += 1
+        return True
 
     def add_token(self, type: TokenType, literal: typing.Any = None):
         self.tokens.append(Token(type, self.text, literal, self.line))
