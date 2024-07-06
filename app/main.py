@@ -59,13 +59,19 @@ class Scanner:
             case '\t': pass
             case '\n': self.line += 1
             case '"': self.string()
-            case _: self.error(self.line, f"Unexpected character: {character}")
+            case _:
+                if character.isnumeric():
+                    self.number()
+                else:
+                    self.error(self.line, f"Unexpected character: {character}")
 
-    def peek(self):
-        if self.is_at_end:
+    def peek(self, n=0):
+        index = self.current + n
+
+        if index >= len(self.source):
             return "\0"
 
-        return self.source[self.current]
+        return self.source[index]
 
     def advance(self):
         index = self.current
@@ -112,6 +118,20 @@ class Scanner:
 
         value = self.source[self.start + 1:self.current - 1]
         self.add_token(TokenType.STRING, value)
+
+    def number(self):
+        while self.peek().isnumeric():
+            self.advance()
+        
+        if self.peek() == '.' and self.peek(1).isnumeric():
+            # consume .
+            self.advance()
+
+            while self.peek().isnumeric():
+                self.advance()
+        
+        value = float(self.text)
+        self.add_token(TokenType.NUMBER, value)
 
 
 def main():
