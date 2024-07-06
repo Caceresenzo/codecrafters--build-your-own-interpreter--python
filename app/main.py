@@ -17,9 +17,15 @@ class Scanner:
         self.current = 0
         self.line = 1
 
+        self.had_error = False
+
     @property
     def is_at_end(self):
         return self.current >= len(self.source)
+
+    @property
+    def text(self):
+        return self.source[self.start:self.current]
 
     def scan_tokens(self):
         while not self.is_at_end:
@@ -43,6 +49,7 @@ class Scanner:
             case '+': self.add_token(TokenType.PLUS)
             case ';': self.add_token(TokenType.SEMICOLON)
             case '*': self.add_token(TokenType.STAR)
+            case _: self.error(self.line, f"Unexpected character: {character}")
 
     def advance(self):
         index = self.current
@@ -50,8 +57,14 @@ class Scanner:
         return self.source[index]
 
     def add_token(self, type: TokenType, literal: typing.Any = None):
-        text = self.source[self.start:self.current]
-        self.tokens.append(Token(type, text, literal, self.line))
+        self.tokens.append(Token(type, self.text, literal, self.line))
+
+    def error(self, line: int, message: str):
+        self.report(line, "", message)
+
+    def report(self, line: int, where: str, message: str):
+        print(f"[line {line}] Error{where}: {message}")
+        self.had_error = True
 
 
 def main():
@@ -78,6 +91,9 @@ def main():
             literal = "null"
 
         print(f"{token.type.name} {token.lexeme} {literal}")
+
+    if scanner.had_error:
+        exit(65)
 
 
 if __name__ == "__main__":
