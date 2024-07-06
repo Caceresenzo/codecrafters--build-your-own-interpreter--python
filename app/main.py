@@ -60,8 +60,10 @@ class Scanner:
             case '\n': self.line += 1
             case '"': self.string()
             case _:
-                if character.isnumeric():
+                if self.is_number(character):
                     self.number()
+                elif self.is_alpha(character):
+                    self.identifier()
                 else:
                     self.error(self.line, f"Unexpected character: {character}")
 
@@ -120,18 +122,33 @@ class Scanner:
         self.add_token(TokenType.STRING, value)
 
     def number(self):
-        while self.peek().isnumeric():
+        while self.is_number(self.peek()):
             self.advance()
-        
-        if self.peek() == '.' and self.peek(1).isnumeric():
+
+        if self.peek() == '.' and self.is_number(self.peek(1)):
             # consume .
             self.advance()
 
-            while self.peek().isnumeric():
+            while self.is_number(self.peek()):
                 self.advance()
-        
+
         value = float(self.text)
         self.add_token(TokenType.NUMBER, value)
+
+    def identifier(self):
+        while self.is_alpha_or_number(self.peek()):
+            self.advance()
+
+        self.add_token(TokenType.IDENTIFIER)
+
+    def is_number(self, character: str):
+        return character.isnumeric()
+
+    def is_alpha(self, character: str):
+        return character.isalpha() or character == '_'
+
+    def is_alpha_or_number(self, character: str):
+        return self.is_number(character) or self.is_alpha(character)
 
 
 def main():
