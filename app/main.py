@@ -58,6 +58,7 @@ class Scanner:
             case '\r': pass
             case '\t': pass
             case '\n': self.line += 1
+            case '"': self.string()
             case _: self.error(self.line, f"Unexpected character: {character}")
 
     def peek(self):
@@ -94,6 +95,22 @@ class Scanner:
     def report(self, line: int, where: str, message: str):
         print(f"[line {line}] Error{where}: {message}", file=sys.stderr)
         self.had_error = True
+
+    def string(self):
+        while self.peek() != '"' and not self.is_at_end:
+            if self.peek() == '\n':
+                self.line += 1
+
+            self.advance()
+
+        if self.is_at_end:
+            self.error(self.line, "Unterminated string.")
+
+        # closing "
+        self.advance()
+
+        value = self.source[self.start + 1:self.current - 1]
+        self.add_token(TokenType.STRING, value)
 
 
 def main():
