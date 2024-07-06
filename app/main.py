@@ -35,6 +35,8 @@ class Scanner:
         match character:
             case '(': self.add_token(TokenType.LEFT_PAREN)
             case ')': self.add_token(TokenType.RIGHT_PAREN)
+            case '{': self.add_token(TokenType.LEFT_BRACE)
+            case '}': self.add_token(TokenType.RIGHT_BRACE)
 
     def advance(self):
         index = self.current
