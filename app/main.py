@@ -49,6 +49,7 @@ class Scanner:
             case '+': self.add_token(TokenType.PLUS)
             case ';': self.add_token(TokenType.SEMICOLON)
             case '*': self.add_token(TokenType.STAR)
+            case '!': self.add_token(TokenType.BANG_EQUAL if self.match('=') else TokenType.BANG)
             case '=': self.add_token(TokenType.EQUAL_EQUAL if self.match('=') else TokenType.EQUAL)
             case _: self.error(self.line, f"Unexpected character: {character}")
 
