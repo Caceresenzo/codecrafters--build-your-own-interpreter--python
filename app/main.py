@@ -1,8 +1,10 @@
 import sys
 
-from .scanner import Scanner
-from .parser import Parser
 from .expression import AstPrinter
+from .lox import Lox
+from .parser import Parser
+from .scanner import Scanner
+
 
 def main():
     if len(sys.argv) < 3:
@@ -17,7 +19,7 @@ def main():
 
     scanner = Scanner(file_contents)
     tokens = scanner.scan_tokens()
-    
+
     parser = Parser(tokens)
 
     if command == "tokenize":
@@ -36,7 +38,7 @@ def main():
         print(f"Unknown command: {command}", file=sys.stderr)
         exit(1)
 
-    if scanner.had_error:
+    if Lox.had_error:
         exit(65)
 
 

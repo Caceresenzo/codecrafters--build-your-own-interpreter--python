@@ -2,6 +2,7 @@ import typing
 
 from .expression import Literal
 from .grammar import Token, TokenType
+from .lox import Lox
 
 
 class Parser:
@@ -26,10 +27,12 @@ class Parser:
         if self.match(TokenType.NIL):
             return Literal(None)
 
-    def match(self, types: typing.Union[typing.Iterable[TokenType], TokenType]):
-        if isinstance(types, TokenType):
-            types = [types]
+        if self.match(TokenType.NUMBER, TokenType.STRING):
+            return Literal(self.previous().literal)
 
+        raise self.error(self.peek(), "Expect expression.")
+
+    def match(self, *types: typing.Iterable[TokenType]):
         for type in types:
             if self.check(type):
                 self.advance()
@@ -58,3 +61,9 @@ class Parser:
 
     def previous(self):
         return self.tokens[self.current - 1]
+
+    def error(self, token: Token, message: str):
+        if token.type == TokenType.EOF:
+            Lox.report(token.line, " at end", message)
+        else:
+            Lox.report(token.line, f" at '{token.lexeme}'", message)

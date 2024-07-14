@@ -1,7 +1,7 @@
-import sys
 import typing
 
 from .grammar import Token, TokenType
+from .lox import Lox
 
 
 class Scanner:
@@ -35,8 +35,6 @@ class Scanner:
         self.start = 0
         self.current = 0
         self.line = 1
-
-        self.had_error = False
 
     @property
     def is_at_end(self):
@@ -116,13 +114,6 @@ class Scanner:
     def add_token(self, type: TokenType, literal: typing.Any = None):
         self.tokens.append(Token(type, self.text, literal, self.line))
 
-    def error(self, line: int, message: str):
-        self.report(line, "", message)
-
-    def report(self, line: int, where: str, message: str):
-        print(f"[line {line}] Error{where}: {message}", file=sys.stderr)
-        self.had_error = True
-
     def string(self):
         while self.peek() != '"' and not self.is_at_end:
             if self.peek() == '\n':
@@ -169,3 +160,6 @@ class Scanner:
 
     def is_alpha_or_number(self, character: str):
         return self.is_number(character) or self.is_alpha(character)
+
+    def error(line: int, message: str):
+        Lox.report(line, "", message)
