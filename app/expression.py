@@ -2,6 +2,8 @@ import abc
 import dataclasses
 import typing
 
+from .grammar import Token
+
 
 class Expression(abc.ABC):
 
@@ -28,12 +30,25 @@ class Grouping(Expression):
         return visitor.visit_grouping(self)
 
 
+@dataclasses.dataclass
+class Unary(Expression):
+
+    operator: Token
+    right: Expression
+
+    def visit(self, visitor: "Visitor"):
+        return visitor.visit_unary(self)
+
+
 class Visitor:
 
     def visit_literal(self, literal: Literal):
         pass
 
     def visit_grouping(self, grouping: Grouping):
+        pass
+
+    def visit_unary(self, unary: Unary):
         pass
 
 
@@ -52,6 +67,9 @@ class AstPrinter(Visitor):
 
     def visit_grouping(self, grouping: Grouping):
         return self.parenthesize("group", grouping.expression)
+
+    def visit_unary(self, unary: Unary):
+        return self.parenthesize(unary.operator.lexeme, unary.right)
 
     def print(self, expression: Expression):
         return expression.visit(self)

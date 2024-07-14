@@ -1,6 +1,6 @@
 import typing
 
-from .expression import Grouping, Literal
+from .expression import Grouping, Literal, Unary
 from .grammar import Token, TokenType
 from .lox import Lox
 
@@ -25,6 +25,15 @@ class Parser:
             return None
 
     def expression(self):
+        return self.unary()
+
+    def unary(self):
+        if self.match(TokenType.BANG, TokenType.MINUS):
+            operator = self.previous()
+            right = self.unary()
+
+            return Unary(operator, right)
+
         return self.primary()
 
     def primary(self):
@@ -42,7 +51,9 @@ class Parser:
 
         if self.match(TokenType.LEFT_PAREN):
             expression = self.expression()
+
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
+
             return Grouping(expression)
 
         raise self.error(self.peek(), "Expect expression.")
