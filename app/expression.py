@@ -36,6 +36,8 @@ class AstPrinter(Visitor):
 
         if literal.value == False:
             return "false"
+        
+        return str(literal.value)
 
     def print(self, expression: Expression):
         return expression.visit(self)
