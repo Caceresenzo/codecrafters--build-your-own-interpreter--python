@@ -6,6 +6,30 @@ from .parser import Parser
 from .scanner import Scanner
 
 
+def tokenize(content: str):
+    scanner = Scanner(content)
+    tokens = scanner.scan_tokens()
+
+    for token in tokens:
+        literal = token.literal
+        if literal is None:
+            literal = "null"
+
+        print(f"{token.type.name} {token.lexeme} {literal}")
+
+
+def parse(content: str):
+    scanner = Scanner(content)
+    tokens = scanner.scan_tokens()
+
+    if Lox.had_error:
+        return
+
+    parser = Parser(tokens)
+    root = parser.expression()
+    print(AstPrinter().print(root))
+
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: ./your_program.sh tokenize <filename>", file=sys.stderr)
@@ -17,22 +41,11 @@ def main():
     with open(filename) as file:
         file_contents = file.read()
 
-    scanner = Scanner(file_contents)
-    tokens = scanner.scan_tokens()
-
-    parser = Parser(tokens)
-
     if command == "tokenize":
-        for token in tokens:
-            literal = token.literal
-            if literal is None:
-                literal = "null"
-
-            print(f"{token.type.name} {token.lexeme} {literal}")
+        tokenize(file_contents)
 
     elif command == "parse":
-        root = parser.expression()
-        print(AstPrinter().print(root))
+        parse(file_contents)
 
     else:
         print(f"Unknown command: {command}", file=sys.stderr)
