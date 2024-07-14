@@ -4,6 +4,9 @@ from .expression import Literal
 from .grammar import Token, TokenType
 from .lox import Lox
 
+class ParserError(RuntimeError):
+    pass
+
 
 class Parser:
 
@@ -67,3 +70,5 @@ class Parser:
             Lox.report(token.line, " at end", message)
         else:
             Lox.report(token.line, f" at '{token.lexeme}'", message)
+
+        return ParserError()
