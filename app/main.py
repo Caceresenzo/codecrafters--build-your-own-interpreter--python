@@ -26,8 +26,10 @@ def parse(content: str):
         return
 
     parser = Parser(tokens)
-    root = parser.expression()
-    print(AstPrinter().print(root))
+    root = parser.parse()
+
+    if not Lox.had_error:
+        print(AstPrinter().print(root))
 
 
 def main():

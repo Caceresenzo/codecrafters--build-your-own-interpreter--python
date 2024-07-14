@@ -1,8 +1,9 @@
 import typing
 
-from .expression import Literal
+from .expression import Grouping, Literal
 from .grammar import Token, TokenType
 from .lox import Lox
+
 
 class ParserError(RuntimeError):
     pass
@@ -16,6 +17,12 @@ class Parser:
     ):
         self.tokens = tokens
         self.current = 0
+
+    def parse(self):
+        try:
+            return self.expression()
+        except ParserError:
+            return None
 
     def expression(self):
         return self.primary()
@@ -32,6 +39,11 @@ class Parser:
 
         if self.match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self.previous().literal)
+
+        if self.match(TokenType.LEFT_PAREN):
+            expression = self.expression()
+            self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
+            return Grouping(expression)
 
         raise self.error(self.peek(), "Expect expression.")
 
@@ -64,6 +76,12 @@ class Parser:
 
     def previous(self):
         return self.tokens[self.current - 1]
+
+    def consume(self, type: TokenType, message: str):
+        if self.check(type):
+            return self.advance()
+
+        raise self.error(self.peek(), message)
 
     def error(self, token: Token, message: str):
         if token.type == TokenType.EOF:

@@ -19,9 +19,21 @@ class Literal(Expression):
         return visitor.visit_literal(self)
 
 
+@dataclasses.dataclass
+class Grouping(Expression):
+
+    expression: Expression
+
+    def visit(self, visitor: "Visitor"):
+        return visitor.visit_grouping(self)
+
+
 class Visitor:
 
     def visit_literal(self, literal: Literal):
+        pass
+
+    def visit_grouping(self, grouping: Grouping):
         pass
 
 
@@ -38,5 +50,17 @@ class AstPrinter(Visitor):
 
         return str(literal.value)
 
+    def visit_grouping(self, grouping: Grouping):
+        return self.parenthesize("group", grouping.expression)
+
     def print(self, expression: Expression):
         return expression.visit(self)
+
+    def parenthesize(self, name: str, *expressions: Expression):
+        builder = f"({name}"
+
+        for expression in expressions:
+            builder += " "
+            builder += expression.visit(self)
+
+        return builder + ")"
