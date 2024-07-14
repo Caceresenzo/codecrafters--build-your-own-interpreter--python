@@ -28,15 +28,14 @@ class Visitor:
 class AstPrinter(Visitor):
 
     def visit_literal(self, literal: Literal):
-        if literal.value is None:
+        value = literal.value
+
+        if value is None:
             return "nil"
 
-        if literal.value == True:
-            return "true"
+        if isinstance(value, bool):
+            return str(value).lower()
 
-        if literal.value == False:
-            return "false"
-        
         return str(literal.value)
 
     def print(self, expression: Expression):
