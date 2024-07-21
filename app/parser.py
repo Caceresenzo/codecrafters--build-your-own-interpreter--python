@@ -25,7 +25,18 @@ class Parser:
             return None
 
     def expression(self):
-        return self.term()
+        return self.comparison()
+
+    def comparison(self):
+        expression = self.factor()
+
+        while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
+            operator = self.previous()
+            right = self.term()
+
+            expression = Binary(expression, operator, right)
+
+        return expression
 
     def term(self):
         expression = self.factor()
