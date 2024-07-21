@@ -40,6 +40,17 @@ class Unary(Expression):
         return visitor.visit_unary(self)
 
 
+@dataclasses.dataclass
+class Binary(Expression):
+
+    left: Expression
+    operator: Token
+    right: Expression
+
+    def visit(self, visitor: "Visitor"):
+        return visitor.visit_binary(self)
+
+
 class Visitor:
 
     def visit_literal(self, literal: Literal):
@@ -49,6 +60,9 @@ class Visitor:
         pass
 
     def visit_unary(self, unary: Unary):
+        pass
+
+    def visit_binary(self, binary: Binary):
         pass
 
 
@@ -70,6 +84,9 @@ class AstPrinter(Visitor):
 
     def visit_unary(self, unary: Unary):
         return self.parenthesize(unary.operator.lexeme, unary.right)
+
+    def visit_binary(self, binary: Binary):
+        return self.parenthesize(binary.operator.lexeme, binary.left, binary.right)
 
     def print(self, expression: Expression):
         return expression.visit(self)

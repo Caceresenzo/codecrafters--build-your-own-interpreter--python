@@ -1,6 +1,6 @@
 import typing
 
-from .expression import Grouping, Literal, Unary
+from .expression import Binary, Grouping, Literal, Unary
 from .grammar import Token, TokenType
 from .lox import Lox
 
@@ -25,7 +25,18 @@ class Parser:
             return None
 
     def expression(self):
-        return self.unary()
+        return self.factor()
+
+    def factor(self):
+        expression = self.unary()
+
+        while self.match(TokenType.SLASH, TokenType.STAR):
+            operator = self.previous()
+            right = self.unary()
+
+            expression = Binary(expression, operator, right)
+
+        return expression
 
     def unary(self):
         if self.match(TokenType.BANG, TokenType.MINUS):
