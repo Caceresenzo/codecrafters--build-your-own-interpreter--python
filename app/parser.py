@@ -28,7 +28,7 @@ class Parser:
         return self.comparison()
 
     def comparison(self):
-        expression = self.factor()
+        expression = self.term()
 
         while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
             operator = self.previous()
