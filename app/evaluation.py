@@ -70,10 +70,22 @@ class Interpreter(Visitor):
                 self.check_number_operands(binary.operator, left, right)
                 return left * right
 
-            case TokenType.GREATER: return left > right
-            case TokenType.GREATER_EQUAL: return left >= right
-            case TokenType.LESS: return left < right
-            case TokenType.LESS_EQUAL: return left <= right
+            case TokenType.GREATER:
+                self.check_number_operands(binary.operator, left, right)
+                return left > right
+
+            case TokenType.GREATER_EQUAL:
+                self.check_number_operands(binary.operator, left, right)
+                return left >= right
+
+            case TokenType.LESS:
+                self.check_number_operands(binary.operator, left, right)
+                return left < right
+
+            case TokenType.LESS_EQUAL:
+                self.check_number_operands(binary.operator, left, right)
+                return left <= right
+
             case TokenType.BANG_EQUAL: return not self.is_equal(left, right)
             case TokenType.EQUAL_EQUAL: return self.is_equal(left, right)
 
