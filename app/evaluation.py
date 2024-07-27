@@ -51,8 +51,15 @@ class Interpreter(Visitor):
         match binary.operator.type:
             case TokenType.MINUS: return left - right
             case TokenType.PLUS: return left + right
-            case TokenType.SLASH: return left / right
-            case TokenType.STAR: return left * right
+
+            case TokenType.SLASH:
+                self.check_number_operands(binary.operator, left, right)
+                return left / right
+
+            case TokenType.STAR:
+                self.check_number_operands(binary.operator, left, right)
+                return left * right
+
             case TokenType.GREATER: return left > right
             case TokenType.GREATER_EQUAL: return left >= right
             case TokenType.LESS: return left < right
@@ -82,6 +89,12 @@ class Interpreter(Visitor):
 
     def check_number_operand(self, operator: Token, operand: typing.Any):
         if isinstance(operand, float):
+            return
+
+        raise RuntimeError(operator, "Operand must be a number.")
+
+    def check_number_operands(self, operator: Token, left: typing.Any, right: typing.Any):
+        if isinstance(left, float) and isinstance(right, float):
             return
 
         raise RuntimeError(operator, "Operand must be a number.")
