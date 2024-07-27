@@ -1,4 +1,7 @@
-from .expression import Binary, Grouping, Literal, Unary, Visitor, Expression
+import typing
+
+from .expression import Binary, Expression, Grouping, Literal, Unary, Visitor
+from .grammar import TokenType
 
 
 class Interpreter(Visitor):
@@ -13,7 +16,22 @@ class Interpreter(Visitor):
         return self.evaluate(grouping.expression)
 
     def visit_unary(self, unary: Unary):
-        raise NotImplementedError()
+        right = self.evaluate(unary.right)
+
+        match unary.operator.type:
+            case TokenType.BANG: return not self.is_truthy(right)
+            case TokenType.MINUS: return -right
+
+        raise NotImplementedError("unreachable")
 
     def visit_binary(self, binary: Binary):
         raise NotImplementedError()
+
+    def is_truthy(self, value: typing.Any):
+        if value is None:
+            return False
+
+        if isinstance(value, bool):
+            return value
+
+        return True

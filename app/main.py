@@ -1,11 +1,11 @@
 import sys
 import typing
 
+from .evaluation import Interpreter
 from .expression import AstPrinter
 from .lox import Lox
 from .parser import Parser
 from .scanner import Scanner
-from .evaluation import Interpreter
 
 
 def tokenize(content: str):
@@ -46,7 +46,7 @@ def evaluate(content: str):
 
     if Lox.had_error:
         return
-    
+
     interpreter = Interpreter()
 
     value = interpreter.evaluate(root)
@@ -59,6 +59,7 @@ def evaluate(content: str):
         value = int_value if int_value == value else value
 
     print(value)
+
 
 def main():
     if len(sys.argv) < 3:
