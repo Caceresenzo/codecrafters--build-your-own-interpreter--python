@@ -25,7 +25,16 @@ class Interpreter(Visitor):
         raise NotImplementedError("unreachable")
 
     def visit_binary(self, binary: Binary):
-        raise NotImplementedError()
+        left = self.evaluate(binary.left)
+        right = self.evaluate(binary.right)
+
+        match binary.operator.type:
+            case TokenType.MINUS: return left - right
+            case TokenType.PLUS: return left + right
+            case TokenType.SLASH: return left / right
+            case TokenType.STAR: return left * right
+
+        raise NotImplementedError("unreachable")
 
     def is_truthy(self, value: typing.Any):
         if value is None:
