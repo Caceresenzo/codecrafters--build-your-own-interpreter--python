@@ -49,8 +49,18 @@ class Interpreter(Visitor):
         right = self.evaluate(binary.right)
 
         match binary.operator.type:
-            case TokenType.MINUS: return left - right
-            case TokenType.PLUS: return left + right
+            case TokenType.MINUS:
+                self.check_number_operands(binary.operator, left, right)
+                return left - right
+
+            case TokenType.PLUS:
+                if isinstance(left, float) and isinstance(right, float):
+                    return left + right
+
+                if isinstance(left, str) and isinstance(right, str):
+                    return left + right
+
+                raise RuntimeError(binary.operator, "Operands must be two numbers or two strings.")
 
             case TokenType.SLASH:
                 self.check_number_operands(binary.operator, left, right)
