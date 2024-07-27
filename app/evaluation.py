@@ -88,7 +88,7 @@ class Interpreter(Visitor):
 
     def stringify(self, value: typing.Any):
         if value is None:
-            return None
+            return "nil"
 
         if isinstance(value, bool):
             return "true" if value else "false"
