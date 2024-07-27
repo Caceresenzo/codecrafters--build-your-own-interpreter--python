@@ -78,6 +78,9 @@ def main():
     if Lox.had_error:
         exit(65)
 
+    if Lox.had_runtime_error:
+        exit(70)
+
 
 if __name__ == "__main__":
     main()
