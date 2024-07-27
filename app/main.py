@@ -1,9 +1,11 @@
 import sys
+import typing
 
 from .expression import AstPrinter
 from .lox import Lox
 from .parser import Parser
 from .scanner import Scanner
+from .evaluation import Interpreter
 
 
 def tokenize(content: str):
@@ -32,6 +34,29 @@ def parse(content: str):
         print(AstPrinter().print(root))
 
 
+def evaluate(content: str):
+    scanner = Scanner(content)
+    tokens = scanner.scan_tokens()
+
+    if Lox.had_error:
+        return
+
+    parser = Parser(tokens)
+    root = parser.parse()
+
+    if Lox.had_error:
+        return
+    
+    interpreter = Interpreter()
+
+    value = interpreter.evaluate(root)
+    if value is None:
+        value = "nil"
+    elif isinstance(value, bool):
+        value = str(value).lower()
+
+    print(value)
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: ./your_program.sh tokenize <filename>", file=sys.stderr)
@@ -48,6 +73,9 @@ def main():
 
     elif command == "parse":
         parse(file_contents)
+
+    elif command == "evaluate":
+        evaluate(file_contents)
 
     else:
         print(f"Unknown command: {command}", file=sys.stderr)
