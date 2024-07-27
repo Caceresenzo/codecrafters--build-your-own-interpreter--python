@@ -54,6 +54,9 @@ def evaluate(content: str):
         value = "nil"
     elif isinstance(value, bool):
         value = str(value).lower()
+    elif isinstance(value, float):
+        int_value = int(value)
+        value = int_value if int_value == value else value
 
     print(value)
 
