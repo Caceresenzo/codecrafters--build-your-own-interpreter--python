@@ -10,7 +10,7 @@ class Interpreter(Visitor):
         return literal.value
 
     def visit_grouping(self, grouping: Grouping):
-        raise NotImplementedError()
+        return self.evaluate(grouping.expression)
 
     def visit_unary(self, unary: Unary):
         raise NotImplementedError()
