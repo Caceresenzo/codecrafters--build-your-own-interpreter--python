@@ -1,10 +1,27 @@
 import typing
+import builtins
 
 from .expression import Binary, Expression, Grouping, Literal, Unary, Visitor
-from .grammar import TokenType
+from .grammar import TokenType, Token
+from .lox import Lox
+
+
+class RuntimeError(builtins.RuntimeError):
+
+    def __init__(self, token: Token, *args):
+        super().__init__(*args)
+
+        self.token = token
 
 
 class Interpreter(Visitor):
+
+    def interpret(self, expression: Exception):
+        try:
+            value = self.evaluate(expression)
+            print(self.stringify(value))
+        except RuntimeError as error:
+            Lox.report_runtime(error.token.line, str(error))
 
     def evaluate(self, expression: Expression):
         return expression.visit(self)
@@ -20,7 +37,10 @@ class Interpreter(Visitor):
 
         match unary.operator.type:
             case TokenType.BANG: return not self.is_truthy(right)
-            case TokenType.MINUS: return -right
+
+            case TokenType.MINUS:
+                self.check_number_operand(unary.operator, right)
+                return -right
 
         raise NotImplementedError("unreachable")
 
@@ -59,3 +79,23 @@ class Interpreter(Visitor):
             return False
 
         return a == b
+
+    def check_number_operand(self, operator: Token, operand: typing.Any):
+        if isinstance(operand, float):
+            return
+
+        raise RuntimeError(operator, "Operand must be a number.")
+
+    def stringify(self, value: typing.Any):
+        if value is None:
+            return None
+
+        if isinstance(value, float):
+            value = str(value)
+
+            if value.endswith(".0"):
+                value = value[:-2]
+
+            return value
+
+        return str(value)

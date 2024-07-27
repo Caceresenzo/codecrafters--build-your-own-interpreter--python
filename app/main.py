@@ -48,17 +48,7 @@ def evaluate(content: str):
         return
 
     interpreter = Interpreter()
-
-    value = interpreter.evaluate(root)
-    if value is None:
-        value = "nil"
-    elif isinstance(value, bool):
-        value = str(value).lower()
-    elif isinstance(value, float):
-        int_value = int(value)
-        value = int_value if int_value == value else value
-
-    print(value)
+    interpreter.interpret(root)
 
 
 def main():
