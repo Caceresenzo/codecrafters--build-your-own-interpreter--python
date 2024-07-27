@@ -33,6 +33,10 @@ class Interpreter(Visitor):
             case TokenType.PLUS: return left + right
             case TokenType.SLASH: return left / right
             case TokenType.STAR: return left * right
+            case TokenType.GREATER: return left > right
+            case TokenType.GREATER_EQUAL: return left >= right
+            case TokenType.LESS: return left < right
+            case TokenType.LESS_EQUAL: return left <= right
 
         raise NotImplementedError("unreachable")
 
