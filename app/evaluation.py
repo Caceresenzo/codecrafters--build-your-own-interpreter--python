@@ -90,6 +90,9 @@ class Interpreter(Visitor):
         if value is None:
             return None
 
+        if isinstance(value, bool):
+            return "true" if value else "false"
+
         if isinstance(value, float):
             value = str(value)
 
