@@ -1,6 +1,6 @@
 import typing
 
-from .expression import Binary, Grouping, Literal, Unary, Variable
+from .expression import Binary, Grouping, Literal, Unary, Variable, Assign
 from .grammar import Token, TokenType
 from .lox import Lox
 from .statement import (ExpressionStatement, PrintStatement, Statement,
@@ -79,7 +79,23 @@ class Parser:
         return ExpressionStatement(expression)
 
     def expression(self):
-        return self.equality()
+        return self.assignment()
+
+    def assignment(self):
+        expression = self.equality()
+
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expression, Variable):
+                name = expression.name
+
+                return Assign(name, value)
+
+            self.error(equals, "Invalid assignment target.")
+
+        return expression
 
     def equality(self):
         expression = self.comparison()
