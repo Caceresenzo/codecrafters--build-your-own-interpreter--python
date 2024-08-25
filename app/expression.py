@@ -51,6 +51,15 @@ class Binary(Expression):
         return visitor.visit_binary(self)
 
 
+@dataclasses.dataclass
+class Variable(Expression):
+
+    name: Token
+
+    def visit(self, visitor: "ExpressionVisitor"):
+        return visitor.visit_variable_expression(self)
+
+
 class ExpressionVisitor:
 
     def visit_literal(self, literal: Literal):
@@ -63,6 +72,9 @@ class ExpressionVisitor:
         pass
 
     def visit_binary(self, binary: Binary):
+        pass
+
+    def visit_variable_expression(self, variable: Variable):
         pass
 
 

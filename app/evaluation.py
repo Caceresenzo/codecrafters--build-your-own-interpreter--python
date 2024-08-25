@@ -1,21 +1,16 @@
 import typing
-import builtins
 
-from .expression import Binary, Expression, Grouping, Literal, Unary, ExpressionVisitor
-from .statement import StatementVisitor, Statement
-from .grammar import TokenType, Token
-from .lox import Lox
-
-
-class RuntimeError(builtins.RuntimeError):
-
-    def __init__(self, token: Token, *args):
-        super().__init__(*args)
-
-        self.token = token
+from .error import RuntimeError
+from .expression import Expression, ExpressionVisitor
+from .grammar import Token, TokenType
+from .lox import Lox, Environment
+from .statement import Statement, StatementVisitor
 
 
 class Interpreter(ExpressionVisitor, StatementVisitor):
+
+    def __init__(self):
+        self.environment = Environment()
 
     def interpret(self, statements: typing.List[Statement]):
         try:
@@ -30,19 +25,26 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
             print(self.stringify(value))
         except RuntimeError as error:
             Lox.report_runtime(error.token.line, str(error))
-    
+
     def execute(self, statement: Statement):
         statement.visit(self)
 
     def evaluate(self, expression: Expression):
         return expression.visit(self)
-    
+
     def visit_expression(self, expression):
-        self.evaluate(expression.expression);
+        self.evaluate(expression.expression)
 
     def visit_print(self, print_):
-        value = self.evaluate(print_.expression);
-        print(self.stringify(value));
+        value = self.evaluate(print_.expression)
+        print(self.stringify(value))
+
+    def visit_variable_statement(self, variable):
+        value = None
+        if variable.initializer is not None:
+            value = self.evaluate(variable.initializer)
+
+        self.environment.define(variable.name.lexeme, value)
 
     def visit_literal(self, literal):
         return literal.value
@@ -108,6 +110,9 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
             case TokenType.EQUAL_EQUAL: return self.is_equal(left, right)
 
         raise NotImplementedError("unreachable")
+
+    def visit_variable_expression(self, variable):
+        return self.environment.get(variable.name)
 
     def is_truthy(self, value: typing.Any):
         if value is None:

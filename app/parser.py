@@ -1,9 +1,10 @@
 import typing
 
-from .expression import Binary, Grouping, Literal, Unary
+from .expression import Binary, Grouping, Literal, Unary, Variable
 from .grammar import Token, TokenType
 from .lox import Lox
-from .statement import Statement, PrintStatement, ExpressionStatement
+from .statement import (ExpressionStatement, PrintStatement, Statement,
+                        VariableStatement)
 
 
 class ParserError(RuntimeError):
@@ -24,7 +25,7 @@ class Parser:
             statements: typing.List[Statement] = []
 
             while not self.is_at_end:
-                statements.append(self.statement())
+                statements.append(self.declaration())
 
             return statements
         except ParserError:
@@ -35,6 +36,27 @@ class Parser:
             return self.expression()
         except ParserError:
             return None
+
+    def declaration(self):
+        try:
+            if self.match(TokenType.VAR):
+                return self.variable_declaration()
+
+            return self.statement()
+        except ParserError:
+            self.synchronize()
+            return None
+
+    def variable_declaration(self):
+        name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        initializer = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+
+        return VariableStatement(name, initializer)
 
     def statement(self):
         if self.match(TokenType.PRINT):
@@ -125,6 +147,9 @@ class Parser:
         if self.match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self.previous().literal)
 
+        if self.match(TokenType.IDENTIFIER):
+            return Variable(self.previous())
+
         if self.match(TokenType.LEFT_PAREN):
             expression = self.expression()
 
@@ -177,3 +202,22 @@ class Parser:
             Lox.report(token.line, f" at '{token.lexeme}'", message)
 
         return ParserError()
+
+    def synchronize(self):
+        self.advance()
+
+        while not self.is_at_end:
+            if self.previous().type == TokenType.SEMICOLON:
+                return
+            
+            match self.peek().type:
+                case TokenType.CLASS: return
+                case TokenType.FUN: return
+                case TokenType.VAR: return
+                case TokenType.FOR: return
+                case TokenType.IF: return
+                case TokenType.WHILE: return
+                case TokenType.PRINT: return
+                case TokenType.RETURN: return
+
+            self.advance()
