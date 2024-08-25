@@ -20,12 +20,15 @@ class Parser:
         self.current = 0
 
     def parse(self):
-        statements: typing.List[Statement] = []
+        try:
+            statements: typing.List[Statement] = []
 
-        while not self.is_at_end:
-            statements.append(self.statement())
+            while not self.is_at_end:
+                statements.append(self.statement())
 
-        return statements
+            return statements
+        except ParserError:
+            return None
 
     def parse_expression(self):
         try:
