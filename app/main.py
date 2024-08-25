@@ -28,7 +28,7 @@ def parse(content: str):
         return
 
     parser = Parser(tokens)
-    root = parser.parse()
+    root = parser.parse_expression()
 
     if not Lox.had_error:
         print(AstPrinter().print(root))
