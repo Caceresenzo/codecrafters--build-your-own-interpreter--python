@@ -8,7 +8,7 @@ from .grammar import Token
 class Expression(abc.ABC):
 
     @abc.abstractmethod
-    def visit(self, visitor: "Visitor"):
+    def visit(self, visitor: "ExpressionVisitor"):
         pass
 
 
@@ -17,7 +17,7 @@ class Literal(Expression):
 
     value: typing.Any
 
-    def visit(self, visitor: "Visitor"):
+    def visit(self, visitor: "ExpressionVisitor"):
         return visitor.visit_literal(self)
 
 
@@ -26,7 +26,7 @@ class Grouping(Expression):
 
     expression: Expression
 
-    def visit(self, visitor: "Visitor"):
+    def visit(self, visitor: "ExpressionVisitor"):
         return visitor.visit_grouping(self)
 
 
@@ -36,7 +36,7 @@ class Unary(Expression):
     operator: Token
     right: Expression
 
-    def visit(self, visitor: "Visitor"):
+    def visit(self, visitor: "ExpressionVisitor"):
         return visitor.visit_unary(self)
 
 
@@ -47,11 +47,11 @@ class Binary(Expression):
     operator: Token
     right: Expression
 
-    def visit(self, visitor: "Visitor"):
+    def visit(self, visitor: "ExpressionVisitor"):
         return visitor.visit_binary(self)
 
 
-class Visitor:
+class ExpressionVisitor:
 
     def visit_literal(self, literal: Literal):
         pass
@@ -66,7 +66,7 @@ class Visitor:
         pass
 
 
-class AstPrinter(Visitor):
+class AstPrinter(ExpressionVisitor):
 
     def visit_literal(self, literal: Literal):
         value = literal.value

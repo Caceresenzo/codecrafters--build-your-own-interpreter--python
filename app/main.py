@@ -42,13 +42,30 @@ def evaluate(content: str):
         return
 
     parser = Parser(tokens)
-    root = parser.parse()
+    expression = parser.parse_expression()
 
     if Lox.had_error:
         return
 
     interpreter = Interpreter()
-    interpreter.interpret(root)
+    interpreter.interpret_expression(expression)
+
+
+def run(content: str):
+    scanner = Scanner(content)
+    tokens = scanner.scan_tokens()
+
+    if Lox.had_error:
+        return
+
+    parser = Parser(tokens)
+    statements = parser.parse()
+
+    if Lox.had_error:
+        return
+
+    interpreter = Interpreter()
+    interpreter.interpret(statements)
 
 
 def main():
@@ -70,6 +87,9 @@ def main():
 
     elif command == "evaluate":
         evaluate(file_contents)
+
+    elif command == "run":
+        run(file_contents)
 
     else:
         print(f"Unknown command: {command}", file=sys.stderr)

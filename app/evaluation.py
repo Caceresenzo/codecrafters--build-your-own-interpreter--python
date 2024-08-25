@@ -1,7 +1,8 @@
 import typing
 import builtins
 
-from .expression import Binary, Expression, Grouping, Literal, Unary, Visitor
+from .expression import Binary, Expression, Grouping, Literal, Unary, ExpressionVisitor
+from .statement import StatementVisitor, Statement
 from .grammar import TokenType, Token
 from .lox import Lox
 
@@ -14,25 +15,42 @@ class RuntimeError(builtins.RuntimeError):
         self.token = token
 
 
-class Interpreter(Visitor):
+class Interpreter(ExpressionVisitor, StatementVisitor):
 
-    def interpret(self, expression: Exception):
+    def interpret(self, statements: typing.List[Statement]):
+        try:
+            for statement in statements:
+                self.execute(statement)
+        except RuntimeError as error:
+            Lox.report_runtime(error.token.line, str(error))
+
+    def interpret_expression(self, expression: Expression):
         try:
             value = self.evaluate(expression)
             print(self.stringify(value))
         except RuntimeError as error:
             Lox.report_runtime(error.token.line, str(error))
+    
+    def execute(self, statement: Statement):
+        statement.visit(self)
 
     def evaluate(self, expression: Expression):
         return expression.visit(self)
+    
+    def visit_expression(self, expression):
+        self.evaluate(expression.expression);
 
-    def visit_literal(self, literal: Literal):
+    def visit_print(self, print_):
+        value = self.evaluate(print_.expression);
+        print(self.stringify(value));
+
+    def visit_literal(self, literal):
         return literal.value
 
-    def visit_grouping(self, grouping: Grouping):
+    def visit_grouping(self, grouping):
         return self.evaluate(grouping.expression)
 
-    def visit_unary(self, unary: Unary):
+    def visit_unary(self, unary):
         right = self.evaluate(unary.right)
 
         match unary.operator.type:
@@ -44,7 +62,7 @@ class Interpreter(Visitor):
 
         raise NotImplementedError("unreachable")
 
-    def visit_binary(self, binary: Binary):
+    def visit_binary(self, binary):
         left = self.evaluate(binary.left)
         right = self.evaluate(binary.right)
 

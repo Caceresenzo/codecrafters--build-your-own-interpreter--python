@@ -3,6 +3,7 @@ import typing
 from .expression import Binary, Grouping, Literal, Unary
 from .grammar import Token, TokenType
 from .lox import Lox
+from .statement import Statement, PrintStatement, ExpressionStatement
 
 
 class ParserError(RuntimeError):
@@ -19,10 +20,38 @@ class Parser:
         self.current = 0
 
     def parse(self):
+        statements: typing.List[Statement] = []
+
+        while not self.is_at_end:
+            statements.append(self.statement())
+
+        return statements
+
+    def parse_expression(self):
         try:
             return self.expression()
         except ParserError:
             return None
+
+    def statement(self):
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+
+        return self.expression_statement()
+
+    def print_statement(self):
+        value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
+
+        return PrintStatement(value)
+
+    def expression_statement(self):
+        expression = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+
+        return ExpressionStatement(expression)
 
     def expression(self):
         return self.equality()
