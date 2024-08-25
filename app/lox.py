@@ -25,8 +25,11 @@ class Environment:
 
     values: typing.Dict[str, typing.Any]
 
-    def __init__(self):
-        self.values = dict()
+    def __init__(self, initial=None):
+        self.values = initial or dict()
+
+    def copy(self):
+        return Environment(self.values.copy())
 
     def define(self, name: str, value: typing.Any):
         self.values[name] = value

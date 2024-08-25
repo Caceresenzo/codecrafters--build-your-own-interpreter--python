@@ -41,6 +41,15 @@ class VariableStatement(abc.ABC):
         visitor.visit_variable_statement(self)
 
 
+@dataclasses.dataclass
+class BlockStatement(abc.ABC):
+
+    statements: typing.List[Expression]
+
+    def visit(self, visitor: "StatementVisitor"):
+        visitor.visit_block(self)
+
+
 class StatementVisitor:
 
     def visit_expression(self, expression: ExpressionStatement):
@@ -50,4 +59,7 @@ class StatementVisitor:
         pass
 
     def visit_variable_statement(self, variable: VariableStatement):
+        pass
+
+    def visit_block(self, block: BlockStatement):
         pass

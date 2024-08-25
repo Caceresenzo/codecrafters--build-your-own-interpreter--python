@@ -4,7 +4,7 @@ from .expression import Binary, Grouping, Literal, Unary, Variable, Assign
 from .grammar import Token, TokenType
 from .lox import Lox
 from .statement import (ExpressionStatement, PrintStatement, Statement,
-                        VariableStatement)
+                        VariableStatement, BlockStatement)
 
 
 class ParserError(RuntimeError):
@@ -61,6 +61,9 @@ class Parser:
     def statement(self):
         if self.match(TokenType.PRINT):
             return self.print_statement()
+        
+        if self.match(TokenType.LEFT_BRACE):
+            return BlockStatement(self.block())
 
         return self.expression_statement()
 
@@ -70,6 +73,15 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
 
         return PrintStatement(value)
+
+    def block(self):
+        statements: typing.List[Statement] = []
+
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end:
+            statements.append(self.declaration())
+
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
 
     def expression_statement(self):
         expression = self.expression()

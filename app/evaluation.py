@@ -26,6 +26,17 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         except RuntimeError as error:
             Lox.report_runtime(error.token.line, str(error))
 
+    def execute_block(self, statements: typing.List[Statement], environment: Environment):
+        previous = self.environment
+
+        try:
+            self.environment = environment
+
+            for statement in statements:
+                self.execute(statement)
+        finally:
+            self.environment = previous
+
     def execute(self, statement: Statement):
         statement.visit(self)
 
@@ -45,6 +56,9 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
             value = self.evaluate(variable.initializer)
 
         self.environment.define(variable.name.lexeme, value)
+
+    def visit_block(self, block):
+        self.execute_block(block.statements, self.environment.copy())
 
     def visit_literal(self, literal):
         return literal.value
