@@ -31,6 +31,14 @@ class Environment:
     def define(self, name: str, value: typing.Any):
         self.values[name] = value
 
+    def assign(self, name: Token, value: typing.Any):
+        lexeme = name.lexeme
+        if lexeme in self.values:
+            self.values[lexeme] = value
+            return
+
+        raise RuntimeError(name, f"Undefined variable '{lexeme}'.")
+
     def get(self, name: Token):
         lexeme = name.lexeme
         if lexeme in self.values:

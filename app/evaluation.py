@@ -114,6 +114,13 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
     def visit_variable_expression(self, variable):
         return self.environment.get(variable.name)
 
+    def visit_assign_expression(self, assign):
+        value = self.evaluate(assign.value)
+
+        self.environment.assign(assign.name, value)
+
+        return value
+
     def is_truthy(self, value: typing.Any):
         if value is None:
             return False
