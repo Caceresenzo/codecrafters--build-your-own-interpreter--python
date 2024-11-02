@@ -14,7 +14,7 @@ class Statement(abc.ABC):
 
 
 @dataclasses.dataclass
-class ExpressionStatement(abc.ABC):
+class ExpressionStatement(Statement):
 
     expression: Expression
 
@@ -23,7 +23,18 @@ class ExpressionStatement(abc.ABC):
 
 
 @dataclasses.dataclass
-class PrintStatement(abc.ABC):
+class IfStatement(Statement):
+
+    condition: Expression
+    then_branch: Statement
+    else_branch: typing.Optional[Statement]
+
+    def visit(self, visitor: "StatementVisitor"):
+        visitor.visit_if(self)
+
+
+@dataclasses.dataclass
+class PrintStatement(Statement):
 
     expression: Expression
 
@@ -32,7 +43,7 @@ class PrintStatement(abc.ABC):
 
 
 @dataclasses.dataclass
-class VariableStatement(abc.ABC):
+class VariableStatement(Statement):
 
     name: Token
     initializer: typing.Optional[Expression]
@@ -42,7 +53,7 @@ class VariableStatement(abc.ABC):
 
 
 @dataclasses.dataclass
-class BlockStatement(abc.ABC):
+class BlockStatement(Statement):
 
     statements: typing.List[Expression]
 
@@ -53,6 +64,9 @@ class BlockStatement(abc.ABC):
 class StatementVisitor:
 
     def visit_expression(self, expression: ExpressionStatement):
+        pass
+
+    def visit_if(self, if_: IfStatement):
         pass
 
     def visit_print(self, print: PrintStatement):

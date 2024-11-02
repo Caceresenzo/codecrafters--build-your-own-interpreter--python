@@ -1,10 +1,10 @@
 import typing
 
-from .expression import Binary, Grouping, Literal, Unary, Variable, Assign
+from .expression import Assign, Binary, Grouping, Literal, Unary, Variable
 from .grammar import Token, TokenType
 from .lox import Lox
-from .statement import (ExpressionStatement, PrintStatement, Statement,
-                        VariableStatement, BlockStatement)
+from .statement import (BlockStatement, ExpressionStatement, IfStatement,
+                        PrintStatement, Statement, VariableStatement)
 
 
 class ParserError(RuntimeError):
@@ -59,13 +59,29 @@ class Parser:
         return VariableStatement(name, initializer)
 
     def statement(self):
+        if self.match(TokenType.IF):
+            return self.if_statement()
+
         if self.match(TokenType.PRINT):
             return self.print_statement()
-        
+
         if self.match(TokenType.LEFT_BRACE):
             return BlockStatement(self.block())
 
         return self.expression_statement()
+
+    def if_statement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        then_branch = self.statement()
+
+        else_branch = None
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+
+        return IfStatement(condition, then_branch, else_branch)
 
     def print_statement(self):
         value = self.expression()
@@ -237,7 +253,7 @@ class Parser:
         while not self.is_at_end:
             if self.previous().type == TokenType.SEMICOLON:
                 return
-            
+
             match self.peek().type:
                 case TokenType.CLASS: return
                 case TokenType.FUN: return
