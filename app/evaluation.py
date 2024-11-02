@@ -64,7 +64,7 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         self.environment.define(variable.name.lexeme, value)
 
     def visit_block(self, block):
-        self.execute_block(block.statements, self.environment.copy())
+        self.execute_block(block.statements, self.environment.inner())
 
     def visit_literal(self, literal):
         return literal.value

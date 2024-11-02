@@ -1,3 +1,4 @@
+import dataclasses
 import sys
 import typing
 
@@ -23,13 +24,19 @@ class Lox:
 
 class Environment:
 
+    enclosing: typing.Optional["Environment"]
     values: typing.Dict[str, typing.Any]
 
-    def __init__(self, initial=None):
+    def __init__(
+        self,
+        enclosing: typing.Optional["Environment"] = None,
+        initial: typing.Optional[typing.Dict[str, typing.Any]] = None
+    ):
+        self.enclosing = enclosing
         self.values = initial or dict()
 
-    def copy(self):
-        return Environment(self.values.copy())
+    def inner(self):
+        return Environment(self)
 
     def define(self, name: str, value: typing.Any):
         self.values[name] = value
@@ -40,11 +47,17 @@ class Environment:
             self.values[lexeme] = value
             return
 
+        if self.enclosing is not None:
+            return self.enclosing.assign(name, value)
+
         raise RuntimeError(name, f"Undefined variable '{lexeme}'.")
 
     def get(self, name: Token):
         lexeme = name.lexeme
         if lexeme in self.values:
             return self.values[lexeme]
+        
+        if self.enclosing is not None:
+            return self.enclosing.get(name)
 
         raise RuntimeError(name, f"Undefined variable '{lexeme}'.")
