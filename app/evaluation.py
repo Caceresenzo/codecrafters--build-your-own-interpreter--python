@@ -56,6 +56,10 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         value = self.evaluate(print_.expression)
         print(self.stringify(value))
 
+    def visit_while(self, while_):
+        while self.is_truthy(self.evaluate(while_.condition)):
+            self.execute(while_.body)
+
     def visit_variable_statement(self, variable):
         value = None
         if variable.initializer is not None:

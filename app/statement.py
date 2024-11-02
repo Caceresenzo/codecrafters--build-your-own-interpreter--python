@@ -43,6 +43,16 @@ class PrintStatement(Statement):
 
 
 @dataclasses.dataclass
+class WhileStatement(Statement):
+
+    condition: Expression
+    body: Statement
+
+    def visit(self, visitor: "StatementVisitor"):
+        visitor.visit_while(self)
+
+
+@dataclasses.dataclass
 class VariableStatement(Statement):
 
     name: Token
@@ -70,6 +80,9 @@ class StatementVisitor:
         pass
 
     def visit_print(self, print: PrintStatement):
+        pass
+
+    def visit_while(self, while_: WhileStatement):
         pass
 
     def visit_variable_statement(self, variable: VariableStatement):
