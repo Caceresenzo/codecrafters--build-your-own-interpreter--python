@@ -70,6 +70,17 @@ class Assign(Expression):
         return visitor.visit_assign_expression(self)
 
 
+@dataclasses.dataclass
+class Logical(Expression):
+
+    left: Expression
+    operator: Token
+    right: Expression
+
+    def visit(self, visitor: "ExpressionVisitor"):
+        return visitor.visit_logical(self)
+
+
 class ExpressionVisitor:
 
     def visit_literal(self, literal: Literal):
@@ -88,6 +99,9 @@ class ExpressionVisitor:
         pass
 
     def visit_assign_expression(self, assign: Assign):
+        pass
+
+    def visit_logical(self, logical: Logical):
         pass
 
 

@@ -1,6 +1,7 @@
 import typing
 
-from .expression import Assign, Binary, Grouping, Literal, Unary, Variable
+from .expression import (Assign, Binary, Grouping, Literal, Logical, Unary,
+                         Variable)
 from .grammar import Token, TokenType
 from .lox import Lox
 from .statement import (BlockStatement, ExpressionStatement, IfStatement,
@@ -110,7 +111,7 @@ class Parser:
         return self.assignment()
 
     def assignment(self):
-        expression = self.equality()
+        expression = self.or_()
 
         if self.match(TokenType.EQUAL):
             equals = self.previous()
@@ -122,6 +123,26 @@ class Parser:
                 return Assign(name, value)
 
             self.error(equals, "Invalid assignment target.")
+
+        return expression
+
+    def or_(self):
+        expression = self.and_()
+
+        while self.match(TokenType.OR):
+            operator = self.previous()
+            right = self.and_()
+            expression = Logical(expression, operator, right)
+
+        return expression
+
+    def and_(self):
+        expression = self.equality()
+
+        while self.match(TokenType.AND):
+            operator = self.previous()
+            right = self.equality()
+            expression = Logical(expression, operator, right)
 
         return expression
 

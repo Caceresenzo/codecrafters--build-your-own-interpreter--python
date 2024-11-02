@@ -3,7 +3,7 @@ import typing
 from .error import RuntimeError
 from .expression import Expression, ExpressionVisitor
 from .grammar import Token, TokenType
-from .lox import Lox, Environment
+from .lox import Environment, Lox
 from .statement import Statement, StatementVisitor
 
 
@@ -140,6 +140,18 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         self.environment.assign(assign.name, value)
 
         return value
+
+    def visit_logical(self, logical):
+        left = self.evaluate(logical.left)
+
+        if logical.operator.type == TokenType.OR:
+            if self.is_truthy(left):
+                return left
+        else:
+            if not self.is_truthy(left):
+                return left
+
+        return self.evaluate(logical.right)
 
     def is_truthy(self, value: typing.Any):
         if value is None:
