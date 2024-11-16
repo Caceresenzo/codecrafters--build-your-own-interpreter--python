@@ -81,6 +81,17 @@ class Logical(Expression):
         return visitor.visit_logical(self)
 
 
+@dataclasses.dataclass
+class Call(Expression):
+
+    callee: Expression
+    parenthesis: Token
+    arguments: typing.List[Expression]
+
+    def visit(self, visitor: "ExpressionVisitor"):
+        return visitor.visit_call(self)
+
+
 class ExpressionVisitor:
 
     def visit_literal(self, literal: Literal):
@@ -102,6 +113,9 @@ class ExpressionVisitor:
         pass
 
     def visit_logical(self, logical: Logical):
+        pass
+
+    def visit_call(self, call: Call):
         pass
 
 

@@ -1,7 +1,7 @@
 import typing
 
-from .expression import (Assign, Binary, Grouping, Literal, Logical, Unary,
-                         Variable)
+from .expression import (Assign, Binary, Call, Expression, Grouping, Literal,
+                         Logical, Unary, Variable)
 from .grammar import Token, TokenType
 from .lox import Lox
 from .statement import (BlockStatement, ExpressionStatement, IfStatement,
@@ -181,7 +181,7 @@ class Parser:
 
                 return Assign(name, value)
 
-            self.error(equals, "Invalid assignment target.")
+            raise self.error(equals, "Invalid assignment target.")
 
         return expression
 
@@ -256,7 +256,35 @@ class Parser:
 
             return Unary(operator, right)
 
-        return self.primary()
+        return self.call()
+
+    def call(self):
+        expression = self.primary()
+
+        while True:
+            if self.match(TokenType.LEFT_PAREN):
+                expression = self.finish_call(expression)
+            else:
+                break
+
+        return expression
+
+    def finish_call(self, callee: Expression):
+        arguments: typing.List[Expression] = []
+
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(arguments) >= 255:
+                    raise self.error(self.peek(), "Can't have more than 255 arguments.")
+
+                arguments.append(self.expression())
+
+                if self.match(TokenType.COMMA):
+                    break
+
+        parenthesis = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+
+        return Call(callee, parenthesis, arguments)
 
     def primary(self):
         if self.match(TokenType.FALSE):

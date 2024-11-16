@@ -1,7 +1,9 @@
 import typing
+import time
 
 from .error import RuntimeError
 from .expression import Expression, ExpressionVisitor
+from .function import Callable, NativeFunction
 from .grammar import Token, TokenType
 from .lox import Environment, Lox
 from .statement import Statement, StatementVisitor
@@ -10,7 +12,10 @@ from .statement import Statement, StatementVisitor
 class Interpreter(ExpressionVisitor, StatementVisitor):
 
     def __init__(self):
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = self.globals
+
+        self.globals.define("clock", NativeFunction("clock", 0, lambda: float(int(time.time()))))
 
     def interpret(self, statements: typing.List[Statement]):
         try:
@@ -156,6 +161,23 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
                 return left
 
         return self.evaluate(logical.right)
+
+    def visit_call(self, call):
+        callee = self.evaluate(call.callee)
+
+        arguments = [
+            self.evaluate(argument)
+            for argument in call.arguments
+        ]
+
+        if not isinstance(callee, Callable):
+            raise RuntimeError(call.parenthesis, "Can only call functions and classes.")
+
+        function = typing.cast(Callable, callee)
+        if len(arguments) != function.arity():
+            raise RuntimeError(call.parenthesis, f"Expected {function.arity()} arguments but got {arguments.size()}.")
+
+        return callee.call(self, arguments)
 
     def is_truthy(self, value: typing.Any):
         if value is None:
