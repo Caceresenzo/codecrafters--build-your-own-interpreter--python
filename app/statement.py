@@ -23,6 +23,17 @@ class ExpressionStatement(Statement):
 
 
 @dataclasses.dataclass
+class FunctionStatement(Statement):
+
+    name: Token
+    parameters: typing.List[Token]
+    body: typing.List[Statement]
+
+    def visit(self, visitor: "StatementVisitor"):
+        visitor.visit_function(self)
+
+
+@dataclasses.dataclass
 class IfStatement(Statement):
 
     condition: Expression
@@ -74,6 +85,9 @@ class BlockStatement(Statement):
 class StatementVisitor:
 
     def visit_expression(self, expression: ExpressionStatement):
+        pass
+
+    def visit_function(self, function: FunctionStatement):
         pass
 
     def visit_if(self, if_: IfStatement):

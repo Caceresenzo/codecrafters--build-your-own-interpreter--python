@@ -3,7 +3,7 @@ import time
 
 from .error import RuntimeError
 from .expression import Expression, ExpressionVisitor
-from .function import Callable, NativeFunction
+from .function import Callable, NativeFunction, LoxFunction
 from .grammar import Token, TokenType
 from .lox import Environment, Lox
 from .statement import Statement, StatementVisitor
@@ -50,6 +50,11 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
     def visit_expression(self, expression):
         self.evaluate(expression.expression)
+    
+    def visit_function(self, function):
+        lox_function = LoxFunction(function)
+
+        self.environment.define(function.name.lexeme, lox_function)
 
     def visit_if(self, if_):
         if self.is_truthy(self.evaluate(if_.condition)):

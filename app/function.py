@@ -1,6 +1,9 @@
 import abc
 import typing
 
+from .statement import FunctionStatement
+from .lox import Environment
+
 if typing.TYPE_CHECKING:
     from .evaluation import Interpreter
 
@@ -40,3 +43,27 @@ class NativeFunction(Callable):
 
     def __str__(self):
         return f"<native fn {self._name}>"
+
+
+class LoxFunction(Callable):
+
+    def __init__(
+        self,
+        declaration: FunctionStatement,
+    ):
+        self._declaration = declaration
+
+    def arity(self) -> int:
+        return len(self._declaration.parameters)
+
+    def call(self, interpreter, arguments):
+        environment = interpreter.globals.inner()
+
+        for parameter, argument in zip(self._declaration.parameters, arguments):
+            environment.define(parameter.lexeme, argument)
+
+        interpreter.execute_block(self._declaration.body, environment)
+        return None
+
+    def __str__(self):
+        return f"<fn {self._declaration.name.lexeme}>"

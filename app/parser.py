@@ -4,9 +4,9 @@ from .expression import (Assign, Binary, Call, Expression, Grouping, Literal,
                          Logical, Unary, Variable)
 from .grammar import Token, TokenType
 from .lox import Lox
-from .statement import (BlockStatement, ExpressionStatement, IfStatement,
-                        PrintStatement, Statement, VariableStatement,
-                        WhileStatement)
+from .statement import (BlockStatement, ExpressionStatement, FunctionStatement,
+                        IfStatement, PrintStatement, Statement,
+                        VariableStatement, WhileStatement)
 
 
 class ParserError(RuntimeError):
@@ -41,6 +41,9 @@ class Parser:
 
     def declaration(self):
         try:
+            if self.match(TokenType.FUN):
+                return self.function("function")
+
             if self.match(TokenType.VAR):
                 return self.variable_declaration()
 
@@ -48,6 +51,29 @@ class Parser:
         except ParserError:
             self.synchronize()
             return None
+
+    def function(self, kind: str):
+        name = self.consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
+
+        self.consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+
+        parameters: typing.List[Token] = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(parameters) >= 255:
+                    raise self.error(self.peek(), "Can't have more than 255 parameters.")
+
+                parameters.append(self.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+
+                if not self.match(TokenType.COMMA):
+                    break
+
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+        self.consume(TokenType.LEFT_BRACE, f"Expect '{{' before {kind} body.")
+
+        body = self.block()
+
+        return FunctionStatement(name, parameters, body)
 
     def variable_declaration(self):
         name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
