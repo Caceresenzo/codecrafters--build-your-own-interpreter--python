@@ -305,7 +305,7 @@ class Parser:
 
                 arguments.append(self.expression())
 
-                if self.match(TokenType.COMMA):
+                if not self.match(TokenType.COMMA):
                     break
 
         parenthesis = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
