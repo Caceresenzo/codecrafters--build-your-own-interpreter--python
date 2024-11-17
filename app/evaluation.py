@@ -1,9 +1,9 @@
-import typing
 import time
+import typing
 
 from .error import RuntimeError
 from .expression import Expression, ExpressionVisitor
-from .function import Callable, NativeFunction, LoxFunction
+from .function import Callable, LoxFunction, NativeFunction, Return
 from .grammar import Token, TokenType
 from .lox import Environment, Lox
 from .statement import Statement, StatementVisitor
@@ -50,7 +50,7 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
     def visit_expression(self, expression):
         self.evaluate(expression.expression)
-    
+
     def visit_function(self, function):
         lox_function = LoxFunction(function)
 
@@ -65,6 +65,13 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
     def visit_print(self, print_):
         value = self.evaluate(print_.expression)
         print(self.stringify(value))
+
+    def visit_return(self, return_):
+        value = None
+        if return_.value is not None:
+            value = self.evaluate(return_.value)
+
+        raise Return(value)
 
     def visit_while(self, while_):
         while self.is_truthy(self.evaluate(while_.condition)):

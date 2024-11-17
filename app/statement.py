@@ -54,6 +54,16 @@ class PrintStatement(Statement):
 
 
 @dataclasses.dataclass
+class ReturnStatement(Statement):
+
+    keyword: Token
+    value: typing.Optional[Expression]
+
+    def visit(self, visitor: "StatementVisitor"):
+        visitor.visit_return(self)
+
+
+@dataclasses.dataclass
 class WhileStatement(Statement):
 
     condition: Expression
@@ -94,6 +104,9 @@ class StatementVisitor:
         pass
 
     def visit_print(self, print: PrintStatement):
+        pass
+
+    def visit_return(self, return_: ReturnStatement):
         pass
 
     def visit_while(self, while_: WhileStatement):

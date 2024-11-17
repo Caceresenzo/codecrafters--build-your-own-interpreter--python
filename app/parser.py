@@ -5,8 +5,8 @@ from .expression import (Assign, Binary, Call, Expression, Grouping, Literal,
 from .grammar import Token, TokenType
 from .lox import Lox
 from .statement import (BlockStatement, ExpressionStatement, FunctionStatement,
-                        IfStatement, PrintStatement, Statement,
-                        VariableStatement, WhileStatement)
+                        IfStatement, PrintStatement, ReturnStatement,
+                        Statement, VariableStatement, WhileStatement)
 
 
 class ParserError(RuntimeError):
@@ -96,6 +96,9 @@ class Parser:
         if self.match(TokenType.PRINT):
             return self.print_statement()
 
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
+
         if self.match(TokenType.WHILE):
             return self.while_statement()
 
@@ -166,6 +169,17 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
 
         return PrintStatement(value)
+
+    def return_statement(self):
+        keyword = self.previous()
+
+        value: Expression = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+
+        return ReturnStatement(keyword, value)
 
     def while_statement(self):
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
