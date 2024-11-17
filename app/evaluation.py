@@ -187,7 +187,7 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
         function = typing.cast(Callable, callee)
         if len(arguments) != function.arity():
-            raise RuntimeError(call.parenthesis, f"Expected {function.arity()} arguments but got {arguments.size()}.")
+            raise RuntimeError(call.parenthesis, f"Expected {function.arity()} arguments but got {len(arguments)}.")
 
         return callee.call(self, arguments)
 
