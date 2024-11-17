@@ -57,14 +57,16 @@ class LoxFunction(Callable):
     def __init__(
         self,
         declaration: FunctionStatement,
+        closure: Environment,
     ):
         self._declaration = declaration
+        self._closure = closure
 
     def arity(self) -> int:
         return len(self._declaration.parameters)
 
     def call(self, interpreter, arguments):
-        environment = interpreter.globals.inner()
+        environment = self._closure.inner()
 
         for parameter, argument in zip(self._declaration.parameters, arguments):
             environment.define(parameter.lexeme, argument)

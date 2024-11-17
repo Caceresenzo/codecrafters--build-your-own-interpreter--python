@@ -52,7 +52,7 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         self.evaluate(expression.expression)
 
     def visit_function(self, function):
-        lox_function = LoxFunction(function)
+        lox_function = LoxFunction(function, self.environment)
 
         self.environment.define(function.name.lexeme, lox_function)
 
