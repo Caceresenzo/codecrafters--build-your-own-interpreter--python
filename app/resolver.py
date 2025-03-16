@@ -11,6 +11,7 @@ from .statement import FunctionStatement, Statement, StatementVisitor
 class FunctionType(enum.Enum):
     NONE = enum.auto()
     FUNCTION = enum.auto()
+    INITIALIZER = enum.auto()
     METHOD = enum.auto()
 
 
@@ -134,6 +135,9 @@ class Resolver(ExpressionVisitor, StatementVisitor):
             Lox.error_token(return_.keyword, "Can't return from top-level code.")
 
         if return_.value is not None:
+            if self.current_function == FunctionType.INITIALIZER:
+                Lox.error_token(return_.keyword, "Can't return a value from an initializer.")
+
             self._resolve(return_.value)
 
     def visit_while(self, while_):
@@ -175,6 +179,9 @@ class Resolver(ExpressionVisitor, StatementVisitor):
 
         for method in class_.methods:
             declaration = FunctionType.METHOD
+            if "init" == method.name.lexeme:
+                declaration = FunctionType.INITIALIZER
+
             self._resolve_function(method, declaration)
 
         self._end_scope()

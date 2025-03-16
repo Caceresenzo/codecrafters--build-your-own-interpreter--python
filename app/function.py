@@ -77,6 +77,9 @@ class LoxFunction(Callable):
         try:
             interpreter.execute_block(self._declaration.body, environment)
         except Return as returned:
+            if self._is_initializer:
+                return self._closure.get_at(0, "this")
+
             return returned.value
 
         if self._is_initializer:
