@@ -240,6 +240,9 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
         self.environment.assign(class_.name, klass)
 
+    def visit_this(self, this):
+        return self.look_up_variable(this.keyword, this)
+
     def is_truthy(self, value: typing.Any):
         if value is None:
             return False

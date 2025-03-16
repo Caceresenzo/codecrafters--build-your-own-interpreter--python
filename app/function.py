@@ -6,6 +6,7 @@ from .lox import Environment
 from .statement import FunctionStatement
 
 if typing.TYPE_CHECKING:
+    from .class_ import LoxInstance
     from .evaluation import Interpreter
 
 
@@ -77,6 +78,12 @@ class LoxFunction(Callable):
             return returned.value
 
         return None
+
+    def bind(self, instance: "LoxInstance"):
+        environment = Environment(self._closure)
+        environment.define("this", instance)
+
+        return LoxFunction(self._declaration, environment)
 
     def __str__(self):
         return f"<fn {self._declaration.name.lexeme}>"

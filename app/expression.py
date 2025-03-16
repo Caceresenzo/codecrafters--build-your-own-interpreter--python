@@ -113,6 +113,15 @@ class Set(Expression):
         return visitor.visit_set(self)
 
 
+@dataclasses.dataclass
+class This(Expression):
+
+    keyword: Token
+
+    def visit(self, visitor: "ExpressionVisitor"):
+        return visitor.visit_this(self)
+
+
 class ExpressionVisitor:
 
     def visit_literal(self, literal: Literal):
@@ -143,6 +152,9 @@ class ExpressionVisitor:
         pass
 
     def visit_set(self, set: Set):
+        pass
+
+    def visit_this(self, this: This):
         pass
 
 

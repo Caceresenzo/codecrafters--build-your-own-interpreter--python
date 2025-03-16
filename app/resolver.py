@@ -158,12 +158,16 @@ class Resolver(ExpressionVisitor, StatementVisitor):
 
     def visit_class(self, class_):
         self._declare(class_.name)
+        self._define(class_.name)
+
+        self._begin_scope()
+        self._peek_scope()["this"] = True
 
         for method in class_.methods:
             declaration = FunctionType.METHOD
             self._resolve_function(method, declaration)
 
-        self._define(class_.name)
+        self._end_scope()
 
     def visit_get(self, get):
         self._resolve(get.object)
@@ -171,3 +175,6 @@ class Resolver(ExpressionVisitor, StatementVisitor):
     def visit_set(self, set):
         self._resolve(set.value)
         self._resolve(set.object)
+
+    def visit_this(self, this):
+        self._resolve_local(this, this.keyword)
