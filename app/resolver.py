@@ -53,6 +53,9 @@ class Resolver(ExpressionVisitor, StatementVisitor):
             return
 
         scope = self._peek_scope()
+        if name.lexeme in scope:
+            Lox.error_token(name, "Already a variable with this name in this scope.")
+
         scope[name.lexeme] = False
 
     def _define(self, name: Token):
