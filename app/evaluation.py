@@ -231,7 +231,12 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
     def visit_class(self, class_):
         self.environment.define(class_.name.lexeme, None)
 
-        klass = LoxClass(class_.name.lexeme)
+        methods = {}
+        for method in class_.methods:
+            function = LoxFunction(method, self.environment)
+            methods[method.name.lexeme] = function
+
+        klass = LoxClass(class_.name.lexeme, methods)
 
         self.environment.assign(class_.name, klass)
 

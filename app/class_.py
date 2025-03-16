@@ -1,14 +1,16 @@
+import dataclasses
 import typing
 
 from .error import RuntimeError
-from .function import Callable
+from .function import Callable, LoxFunction
 from .grammar import Token
 
 
+@dataclasses.dataclass
 class LoxClass(Callable):
 
-    def __init__(self, name: str):
-        self.name = name
+    name: str
+    methods: typing.Dict[str, LoxFunction]
 
     def arity(self):
         return 0
@@ -16,21 +18,26 @@ class LoxClass(Callable):
     def call(self, interpreter, arguments):
         return LoxInstance(self)
 
+    def find_method(self, name: str):
+        return self.methods.get(name)
+
     def __str__(self):
         return self.name
 
 
+@dataclasses.dataclass
 class LoxInstance:
 
-    fields: typing.Dict[str, typing.Any]
-
-    def __init__(self, klass: LoxClass):
-        self.klass = klass
-        self.fields = {}
+    klass: LoxClass
+    fields: typing.Dict[str, typing.Any] = dataclasses.field(default_factory=lambda: {})
 
     def get(self, name: Token):
         if name.lexeme in self.fields:
             return self.fields[name.lexeme]
+
+        method = self.klass.find_method(name.lexeme)
+        if method is not None:
+            return method
 
         raise RuntimeError(name, f"Undefined property '{name.lexeme}'.")
 

@@ -11,6 +11,7 @@ from .statement import FunctionStatement, Statement, StatementVisitor
 class FunctionType(enum.Enum):
     NONE = enum.auto()
     FUNCTION = enum.auto()
+    METHOD = enum.auto()
 
 
 class Resolver(ExpressionVisitor, StatementVisitor):
@@ -157,6 +158,11 @@ class Resolver(ExpressionVisitor, StatementVisitor):
 
     def visit_class(self, class_):
         self._declare(class_.name)
+
+        for method in class_.methods:
+            declaration = FunctionType.METHOD
+            self._resolve_function(method, declaration)
+
         self._define(class_.name)
 
     def visit_get(self, get):
