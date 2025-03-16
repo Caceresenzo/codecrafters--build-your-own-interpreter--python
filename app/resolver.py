@@ -1,3 +1,4 @@
+import enum
 import typing
 
 from .evaluation import Interpreter
@@ -7,13 +8,20 @@ from .lox import Lox
 from .statement import FunctionStatement, Statement, StatementVisitor
 
 
+class FunctionType(enum.Enum):
+    NONE = enum.auto()
+    FUNCTION = enum.auto()
+
+
 class Resolver(ExpressionVisitor, StatementVisitor):
 
     scopes: typing.List[typing.Dict[str, bool]]
 
     def __init__(self, interpreter: Interpreter):
         self.interpreter = interpreter
+
         self.scopes = []
+        self.current_function = FunctionType.NONE
 
     def _resolve(self, statement_or_expression: Statement | Expression):
         statement_or_expression.visit(self)
@@ -28,7 +36,10 @@ class Resolver(ExpressionVisitor, StatementVisitor):
                 self.interpreter.resolve(expression, len(self.scopes) - 1 - index)
                 return
 
-    def _resolve_function(self, function: FunctionStatement):
+    def _resolve_function(self, function: FunctionStatement, type: FunctionType):
+        enclosing_function = self.current_function
+        self.current_function = type
+
         self._begin_scope()
 
         for parameter in function.parameters:
@@ -38,6 +49,8 @@ class Resolver(ExpressionVisitor, StatementVisitor):
         self.resolve_statements(function.body)
 
         self._end_scope()
+
+        self.current_function = enclosing_function
 
     def _begin_scope(self):
         self.scopes.append({})
@@ -93,7 +106,7 @@ class Resolver(ExpressionVisitor, StatementVisitor):
         self._declare(function.name)
         self._define(function.name)
 
-        self._resolve_function(function)
+        self._resolve_function(function, FunctionType.FUNCTION)
 
     def visit_expression(self, expression):
         self._resolve(expression.expression)
@@ -109,6 +122,9 @@ class Resolver(ExpressionVisitor, StatementVisitor):
         self._resolve(print.expression)
 
     def visit_return(self, return_):
+        if self.current_function == FunctionType.NONE:
+            Lox.error_token(return_.keyword, "Can't return from top-level code.")
+
         if return_.value is not None:
             self._resolve(return_.value)
 
