@@ -1,0 +1,3 @@
+var a = "value";
+var a = a;      // This is allowed in global scope
+print a;        // Should print "value"

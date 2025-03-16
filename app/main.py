@@ -63,11 +63,14 @@ def run(content: str):
 
     if Lox.had_error:
         return
-    
+
     interpreter = Interpreter()
 
-    resolver = Resolver(interpreter);
-    resolver.resolve_statements(statements);
+    resolver = Resolver(interpreter)
+    resolver.resolve_statements(statements)
+
+    if Lox.had_error:
+        return
 
     interpreter.interpret(statements)
 
