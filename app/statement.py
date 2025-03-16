@@ -92,6 +92,16 @@ class BlockStatement(Statement):
         visitor.visit_block(self)
 
 
+@dataclasses.dataclass
+class ClassStatement(Statement):
+
+    name: Token
+    methods: typing.List[FunctionStatement]
+
+    def visit(self, visitor: "StatementVisitor"):
+        visitor.visit_class(self)
+
+
 class StatementVisitor:
 
     def visit_expression(self, expression: ExpressionStatement):
@@ -116,4 +126,7 @@ class StatementVisitor:
         pass
 
     def visit_block(self, block: BlockStatement):
+        pass
+
+    def visit_class(self, class_: ClassStatement):
         pass

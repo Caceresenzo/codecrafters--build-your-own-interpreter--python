@@ -4,9 +4,10 @@ from .expression import (Assign, Binary, Call, Expression, Grouping, Literal,
                          Logical, Unary, Variable)
 from .grammar import Token, TokenType
 from .lox import Lox
-from .statement import (BlockStatement, ExpressionStatement, FunctionStatement,
-                        IfStatement, PrintStatement, ReturnStatement,
-                        Statement, VariableStatement, WhileStatement)
+from .statement import (BlockStatement, ClassStatement, ExpressionStatement,
+                        FunctionStatement, IfStatement, PrintStatement,
+                        ReturnStatement, Statement, VariableStatement,
+                        WhileStatement)
 
 
 class ParserError(RuntimeError):
@@ -41,6 +42,9 @@ class Parser:
 
     def declaration(self):
         try:
+            if self.match(TokenType.CLASS):
+                return self.class_declaration()
+
             if self.match(TokenType.FUN):
                 return self.function("function")
 
@@ -51,6 +55,18 @@ class Parser:
         except ParserError:
             self.synchronize()
             return None
+
+    def class_declaration(self):
+        name = self.consume(TokenType.IDENTIFIER, "Expect class name.")
+        self.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
+
+        methods = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end:
+            methods.append(self.function("method"))
+
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
+
+        return ClassStatement(name, methods)
 
     def function(self, kind: str):
         name = self.consume(TokenType.IDENTIFIER, f"Expect {kind} name.")

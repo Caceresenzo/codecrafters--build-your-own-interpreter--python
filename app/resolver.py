@@ -154,3 +154,7 @@ class Resolver(ExpressionVisitor, StatementVisitor):
 
     def visit_unary(self, unary):
         self._resolve(unary.right)
+
+    def visit_class(self, class_):
+        self._declare(class_.name)
+        self._define(class_.name)

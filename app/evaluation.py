@@ -1,6 +1,7 @@
 import time
 import typing
 
+from .class_ import LoxClass
 from .error import RuntimeError
 from .expression import Expression, ExpressionVisitor
 from .function import Callable, LoxFunction, NativeFunction, Return
@@ -165,7 +166,7 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
         if distance is not None:
             return self.environment.get_at(distance, name.lexeme)
-        
+
         return self.globals.get(name)
 
     def visit_assign_expression(self, assign):
@@ -207,6 +208,13 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
             raise RuntimeError(call.parenthesis, f"Expected {function.arity()} arguments but got {len(arguments)}.")
 
         return callee.call(self, arguments)
+
+    def visit_class(self, class_):
+        self.environment.define(class_.name.lexeme, None)
+
+        klass = LoxClass(class_.name.lexeme)
+
+        self.environment.assign(class_.name, klass)
 
     def is_truthy(self, value: typing.Any):
         if value is None:
