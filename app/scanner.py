@@ -162,4 +162,4 @@ class Scanner:
         return self.is_number(character) or self.is_alpha(character)
 
     def error(self, line: int, message: str):
-        Lox.report(line, "", message)
+        Lox.error(line, message)

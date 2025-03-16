@@ -15,6 +15,8 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         self.globals = Environment()
         self.environment = self.globals
 
+        self.locals: typing.Dict[int, int] = {}
+
         self.globals.define("clock", NativeFunction("clock", 0, lambda: float(int(time.time()))))
 
     def interpret(self, statements: typing.List[Statement]):
@@ -44,6 +46,9 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
     def execute(self, statement: Statement):
         statement.visit(self)
+
+    def resolve(self, expression: Expression, depth: int):
+        self.locals[id(expression)] = depth
 
     def evaluate(self, expression: Expression):
         return expression.visit(self)
@@ -153,12 +158,24 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         raise NotImplementedError("unreachable")
 
     def visit_variable_expression(self, variable):
-        return self.environment.get(variable.name)
+        return self.look_up_variable(variable.name, variable)
+
+    def look_up_variable(self, name: Token, expression: Expression):
+        distance = self.locals.get(id(expression))
+
+        if distance is not None:
+            return self.environment.get_at(distance, name.lexeme)
+        
+        return self.globals.get(name)
 
     def visit_assign_expression(self, assign):
         value = self.evaluate(assign.value)
 
-        self.environment.assign(assign.name, value)
+        distance = self.locals.get(id(assign))
+        if distance is not None:
+            self.environment.assign_at(distance, assign.name, value)
+        else:
+            self.globals.assign(assign.name, value)
 
         return value
 

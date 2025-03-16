@@ -1,10 +1,10 @@
 import sys
-import typing
 
 from .evaluation import Interpreter
 from .expression import AstPrinter
 from .lox import Lox
 from .parser import Parser
+from .resolver import Resolver
 from .scanner import Scanner
 
 
@@ -63,8 +63,12 @@ def run(content: str):
 
     if Lox.had_error:
         return
-
+    
     interpreter = Interpreter()
+
+    resolver = Resolver(interpreter);
+    resolver.resolve_statements(statements);
+
     interpreter.interpret(statements)
 
 

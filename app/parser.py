@@ -388,10 +388,7 @@ class Parser:
         raise self.error(self.peek(), message)
 
     def error(self, token: Token, message: str):
-        if token.type == TokenType.EOF:
-            Lox.report(token.line, " at end", message)
-        else:
-            Lox.report(token.line, f" at '{token.lexeme}'", message)
+        Lox.error_token(token, message)
 
         return ParserError()
 

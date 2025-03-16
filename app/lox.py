@@ -3,7 +3,7 @@ import sys
 import typing
 
 from .error import RuntimeError
-from .grammar import Token
+from .grammar import Token, TokenType
 
 
 class Lox:
@@ -20,6 +20,15 @@ class Lox:
     def report_runtime(line: int, message: str):
         print(f"{message}\n[line {line}]", file=sys.stderr)
         Lox.had_runtime_error = True
+
+    def error_token(token: Token, message: str):
+        if token.type == TokenType.EOF:
+            Lox.report(token.line, " at end", message)
+        else:
+            Lox.report(token.line, f" at '{token.lexeme}'", message)
+
+    def error(line: int, message: str):
+        Lox.report(line, "", message)
 
 
 class Environment:
@@ -56,8 +65,22 @@ class Environment:
         lexeme = name.lexeme
         if lexeme in self.values:
             return self.values[lexeme]
-        
+
         if self.enclosing is not None:
             return self.enclosing.get(name)
 
         raise RuntimeError(name, f"Undefined variable '{lexeme}'.")
+
+    def get_at(self, distance: int, name: str):
+        return self.ancestor(distance).values.get(name)
+
+    def assign_at(self, distance: int, name: Token, value: typing.Any):
+        self.ancestor(distance).values[name.lexeme] = value
+
+    def ancestor(self, distance: int):
+        environment = self
+
+        for _ in range(distance):
+            environment = environment.enclosing
+
+        return environment
