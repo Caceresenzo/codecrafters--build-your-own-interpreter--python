@@ -14,6 +14,11 @@ class FunctionType(enum.Enum):
     METHOD = enum.auto()
 
 
+class ClassType(enum.Enum):
+    NONE = enum.auto()
+    CLASS = enum.auto()
+
+
 class Resolver(ExpressionVisitor, StatementVisitor):
 
     scopes: typing.List[typing.Dict[str, bool]]
@@ -22,7 +27,9 @@ class Resolver(ExpressionVisitor, StatementVisitor):
         self.interpreter = interpreter
 
         self.scopes = []
+
         self.current_function = FunctionType.NONE
+        self.current_class = ClassType.NONE
 
     def _resolve(self, statement_or_expression: Statement | Expression):
         statement_or_expression.visit(self)
@@ -157,6 +164,9 @@ class Resolver(ExpressionVisitor, StatementVisitor):
         self._resolve(unary.right)
 
     def visit_class(self, class_):
+        enclosing_class = self.current_class
+        self.current_class = ClassType.CLASS
+
         self._declare(class_.name)
         self._define(class_.name)
 
@@ -169,6 +179,8 @@ class Resolver(ExpressionVisitor, StatementVisitor):
 
         self._end_scope()
 
+        self.current_class = enclosing_class
+
     def visit_get(self, get):
         self._resolve(get.object)
 
@@ -177,4 +189,8 @@ class Resolver(ExpressionVisitor, StatementVisitor):
         self._resolve(set.object)
 
     def visit_this(self, this):
+        if self.current_class == ClassType.NONE:
+            Lox.error_token(this.keyword, "Can't use 'this' outside of a class.")
+            return
+
         self._resolve_local(this, this.keyword)
