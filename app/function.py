@@ -59,9 +59,11 @@ class LoxFunction(Callable):
         self,
         declaration: FunctionStatement,
         closure: Environment,
+        is_initializer: bool,
     ):
         self._declaration = declaration
         self._closure = closure
+        self._is_initializer = is_initializer
 
     def arity(self) -> int:
         return len(self._declaration.parameters)
@@ -77,13 +79,16 @@ class LoxFunction(Callable):
         except Return as returned:
             return returned.value
 
+        if self._is_initializer:
+            return self._closure.get_at(0, "this")
+
         return None
 
     def bind(self, instance: "LoxInstance"):
         environment = Environment(self._closure)
         environment.define("this", instance)
 
-        return LoxFunction(self._declaration, environment)
+        return LoxFunction(self._declaration, environment, self._is_initializer)
 
     def __str__(self):
         return f"<fn {self._declaration.name.lexeme}>"

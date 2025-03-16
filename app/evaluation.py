@@ -58,7 +58,7 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         self.evaluate(expression.expression)
 
     def visit_function(self, function):
-        lox_function = LoxFunction(function, self.environment)
+        lox_function = LoxFunction(function, self.environment, False)
 
         self.environment.define(function.name.lexeme, lox_function)
 
@@ -233,7 +233,9 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
         methods = {}
         for method in class_.methods:
-            function = LoxFunction(method, self.environment)
+            is_initializer = "init" == method.name.lexeme
+
+            function = LoxFunction(method, self.environment, is_initializer)
             methods[method.name.lexeme] = function
 
         klass = LoxClass(class_.name.lexeme, methods)

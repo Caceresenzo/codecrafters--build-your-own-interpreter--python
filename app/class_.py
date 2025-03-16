@@ -13,10 +13,20 @@ class LoxClass(Callable):
     methods: typing.Dict[str, LoxFunction]
 
     def arity(self):
+        initializer = self.find_method("init")
+        if initializer is not None:
+            return initializer.arity()
+
         return 0
 
     def call(self, interpreter, arguments):
-        return LoxInstance(self)
+        instance = LoxInstance(self)
+
+        initializer = self.find_method("init")
+        if initializer is not None:
+            initializer.bind(instance).call(interpreter, arguments)
+
+        return instance
 
     def find_method(self, name: str):
         return self.methods.get(name)
