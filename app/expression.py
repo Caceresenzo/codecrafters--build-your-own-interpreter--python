@@ -92,6 +92,27 @@ class Call(Expression):
         return visitor.visit_call(self)
 
 
+@dataclasses.dataclass
+class Get(Expression):
+
+    object: Expression
+    name: Token
+
+    def visit(self, visitor: "ExpressionVisitor"):
+        return visitor.visit_get(self)
+
+
+@dataclasses.dataclass
+class Set(Expression):
+
+    object: Expression
+    name: Token
+    value: Expression
+
+    def visit(self, visitor: "ExpressionVisitor"):
+        return visitor.visit_set(self)
+
+
 class ExpressionVisitor:
 
     def visit_literal(self, literal: Literal):
@@ -116,6 +137,12 @@ class ExpressionVisitor:
         pass
 
     def visit_call(self, call: Call):
+        pass
+
+    def visit_get(self, get: Get):
+        pass
+
+    def visit_set(self, set: Set):
         pass
 
 

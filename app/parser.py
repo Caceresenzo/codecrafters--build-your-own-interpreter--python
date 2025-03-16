@@ -1,13 +1,9 @@
 import typing
 
-from .expression import (Assign, Binary, Call, Expression, Grouping, Literal,
-                         Logical, Unary, Variable)
+from .expression import *
 from .grammar import Token, TokenType
 from .lox import Lox
-from .statement import (BlockStatement, ClassStatement, ExpressionStatement,
-                        FunctionStatement, IfStatement, PrintStatement,
-                        ReturnStatement, Statement, VariableStatement,
-                        WhileStatement)
+from .statement import *
 
 
 class ParserError(RuntimeError):
@@ -234,8 +230,9 @@ class Parser:
 
             if isinstance(expression, Variable):
                 name = expression.name
-
                 return Assign(name, value)
+            elif isinstance(expression, Get):
+                return Set(expression.object, expression.name, value)
 
             raise self.error(equals, "Invalid assignment target.")
 
@@ -320,6 +317,9 @@ class Parser:
         while True:
             if self.match(TokenType.LEFT_PAREN):
                 expression = self.finish_call(expression)
+            elif self.match(TokenType.DOT):
+                name = self.consume(TokenType.IDENTIFIER, "Expect property name after '.'.")
+                expression = Get(expression, name)
             else:
                 break
 

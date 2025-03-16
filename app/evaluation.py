@@ -1,7 +1,7 @@
 import time
 import typing
 
-from .class_ import LoxClass
+from .class_ import LoxClass, LoxInstance
 from .error import RuntimeError
 from .expression import Expression, ExpressionVisitor
 from .function import Callable, LoxFunction, NativeFunction, Return
@@ -208,6 +208,25 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
             raise RuntimeError(call.parenthesis, f"Expected {function.arity()} arguments but got {len(arguments)}.")
 
         return callee.call(self, arguments)
+
+    def visit_get(self, get):
+        object = self.evaluate(get.object)
+
+        if isinstance(object, LoxInstance):
+            return object.get(get.name)
+
+        raise RuntimeError(get.name, "Only instances have properties.")
+
+    def visit_set(self, set):
+        object = self.evaluate(set.object)
+
+        if not isinstance(object, LoxInstance):
+            raise RuntimeError(set.name, "Only instances have properties.")
+
+        value = self.evaluate(set.value)
+        object.set(set.name, value)
+
+        return value
 
     def visit_class(self, class_):
         self.environment.define(class_.name.lexeme, None)

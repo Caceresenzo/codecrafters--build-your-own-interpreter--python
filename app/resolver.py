@@ -158,3 +158,10 @@ class Resolver(ExpressionVisitor, StatementVisitor):
     def visit_class(self, class_):
         self._declare(class_.name)
         self._define(class_.name)
+
+    def visit_get(self, get):
+        self._resolve(get.object)
+
+    def visit_set(self, set):
+        self._resolve(set.value)
+        self._resolve(set.object)
