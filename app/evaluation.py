@@ -165,8 +165,10 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         distance = self.locals.get(id(expression))
 
         if distance is not None:
+            # print(f"{name.lexeme} {id(expression)} found at distance {distance}")
             return self.environment.get_at(distance, name.lexeme)
 
+        # print(f"{name.lexeme} {id(expression)} not found")
         return self.globals.get(name)
 
     def visit_assign_expression(self, assign):
@@ -229,6 +231,13 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
         return value
 
     def visit_class(self, class_):
+        superclass = None
+        if class_.superclass is not None:
+            superclass = self.evaluate(class_.superclass)
+
+            if not isinstance(superclass, LoxClass):
+                raise RuntimeError(class_.superclass.name, "Superclass must be a class.")
+
         self.environment.define(class_.name.lexeme, None)
 
         methods = {}
