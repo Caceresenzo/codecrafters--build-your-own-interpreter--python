@@ -42,6 +42,7 @@ class Resolver(ExpressionVisitor, StatementVisitor):
     def _resolve_local(self, expression: Expression, name: Token):
         for index in range(len(self.scopes) - 1, -1, -1):
             if name.lexeme in self.scopes[index]:
+                # print(f"resolve {name.lexeme} ({id(expression)}) at distance {len(self.scopes) - 1 - index}");
                 self.interpreter.resolve(expression, len(self.scopes) - 1 - index)
                 return
 
@@ -173,6 +174,12 @@ class Resolver(ExpressionVisitor, StatementVisitor):
 
         self._declare(class_.name)
         self._define(class_.name)
+
+        if class_.superclass is not None and class_.name.lexeme == class_.superclass.name.lexeme:
+            Lox.error_token(class_.superclass.name, "A class can't inherit from itself.")
+
+        if class_.superclass is not None:
+            self._resolve(class_.superclass)
 
         self._begin_scope()
         self._peek_scope()["this"] = True

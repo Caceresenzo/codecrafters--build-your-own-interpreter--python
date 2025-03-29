@@ -2,7 +2,7 @@ import abc
 import dataclasses
 import typing
 
-from .expression import Expression
+from .expression import Expression, Variable
 from .grammar import Token
 
 
@@ -96,6 +96,7 @@ class BlockStatement(Statement):
 class ClassStatement(Statement):
 
     name: Token
+    superclass: typing.Optional[Variable]
     methods: typing.List[FunctionStatement]
 
     def visit(self, visitor: "StatementVisitor"):
