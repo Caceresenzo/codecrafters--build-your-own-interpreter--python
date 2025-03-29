@@ -247,7 +247,7 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
             function = LoxFunction(method, self.environment, is_initializer)
             methods[method.name.lexeme] = function
 
-        klass = LoxClass(class_.name.lexeme, methods)
+        klass = LoxClass(class_.name.lexeme, superclass, methods)
 
         self.environment.assign(class_.name, klass)
 

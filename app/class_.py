@@ -10,6 +10,7 @@ from .grammar import Token
 class LoxClass(Callable):
 
     name: str
+    superclass: typing.Optional["LoxClass"]
     methods: typing.Dict[str, LoxFunction]
 
     def arity(self):
@@ -29,7 +30,14 @@ class LoxClass(Callable):
         return instance
 
     def find_method(self, name: str):
-        return self.methods.get(name)
+        method = self.methods.get(name)
+        if method is not None:
+            return method
+        
+        if self.superclass:
+            return self.superclass.find_method(name)
+
+        return None
 
     def __str__(self):
         return self.name
