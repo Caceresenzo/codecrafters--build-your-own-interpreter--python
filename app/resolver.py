@@ -18,6 +18,7 @@ class FunctionType(enum.Enum):
 class ClassType(enum.Enum):
     NONE = enum.auto()
     CLASS = enum.auto()
+    SUBCLASS = enum.auto()
 
 
 class Resolver(ExpressionVisitor, StatementVisitor):
@@ -179,6 +180,7 @@ class Resolver(ExpressionVisitor, StatementVisitor):
             Lox.error_token(class_.superclass.name, "A class can't inherit from itself.")
 
         if class_.superclass is not None:
+            self.current_class = ClassType.SUBCLASS
             self._resolve(class_.superclass)
 
         if class_.superclass is not None:
@@ -217,4 +219,9 @@ class Resolver(ExpressionVisitor, StatementVisitor):
         self._resolve_local(this, this.keyword)
 
     def visit_super(self, super_):
+        if self.current_class == ClassType.NONE:
+            Lox.error_token(super_.keyword, "Can't use 'super' outside of a class.")
+        elif self.current_class != ClassType.SUBCLASS:
+            Lox.error_token(super_.keyword, "Can't use 'super' in a class with no superclass.")
+
         self._resolve_local(super_, super_.keyword)
