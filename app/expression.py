@@ -122,6 +122,16 @@ class This(Expression):
         return visitor.visit_this(self)
 
 
+@dataclasses.dataclass
+class Super(Expression):
+
+    keyword: Token
+    method: Token
+
+    def visit(self, visitor: "ExpressionVisitor"):
+        return visitor.visit_super(self)
+
+
 class ExpressionVisitor:
 
     def visit_literal(self, literal: Literal):
@@ -155,6 +165,9 @@ class ExpressionVisitor:
         pass
 
     def visit_this(self, this: This):
+        pass
+
+    def visit_super(self, super: Super):
         pass
 
 

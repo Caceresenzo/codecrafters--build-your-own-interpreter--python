@@ -181,6 +181,10 @@ class Resolver(ExpressionVisitor, StatementVisitor):
         if class_.superclass is not None:
             self._resolve(class_.superclass)
 
+        if class_.superclass is not None:
+            self._begin_scope()
+            self._peek_scope()["super"] = True
+
         self._begin_scope()
         self._peek_scope()["this"] = True
 
@@ -192,6 +196,9 @@ class Resolver(ExpressionVisitor, StatementVisitor):
             self._resolve_function(method, declaration)
 
         self._end_scope()
+
+        if class_.superclass is not None:
+            self._end_scope()
 
         self.current_class = enclosing_class
 
@@ -208,3 +215,6 @@ class Resolver(ExpressionVisitor, StatementVisitor):
             return
 
         self._resolve_local(this, this.keyword)
+
+    def visit_super(self, super_):
+        self._resolve_local(super_, super_.keyword)

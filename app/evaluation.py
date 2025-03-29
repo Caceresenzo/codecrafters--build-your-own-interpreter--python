@@ -50,6 +50,7 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
     def resolve(self, expression: Expression, depth: int):
         self.locals[id(expression)] = depth
+        # print("resolve", expression, id(expression), depth)
 
     def evaluate(self, expression: Expression):
         return expression.visit(self)
@@ -240,6 +241,10 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
         self.environment.define(class_.name.lexeme, None)
 
+        if class_.superclass is not None:
+            self.environment = self.environment.inner()
+            self.environment.define("super", superclass)
+
         methods = {}
         for method in class_.methods:
             is_initializer = "init" == method.name.lexeme
@@ -249,10 +254,29 @@ class Interpreter(ExpressionVisitor, StatementVisitor):
 
         klass = LoxClass(class_.name.lexeme, superclass, methods)
 
+        if class_.superclass is not None:
+            self.environment = self.environment.enclosing
+
         self.environment.assign(class_.name, klass)
 
     def visit_this(self, this):
         return self.look_up_variable(this.keyword, this)
+
+    def visit_super(self, super_):
+        distance = self.locals.get(id(super_))
+        assert distance is not None
+
+        superclass = self.environment.get_at(distance, "super")
+        assert isinstance(superclass, LoxClass)
+
+        instance = self.environment.get_at(distance - 1, "this")
+        assert isinstance(instance, LoxInstance)
+
+        method = superclass.find_method(super_.method.lexeme)
+        if method is None:
+            raise RuntimeError(super_.method, f"Undefined property '{super_.method.lexeme}'.")
+
+        return method.bind(instance)
 
     def is_truthy(self, value: typing.Any):
         if value is None:
